@@ -1,0 +1,17 @@
+[general]
+name=Directional Line Buffer
+qgisMinimumVersion=3.30
+description=Interactive left, right, or both-side line buffer digitizing tool for projected meter-based QGIS projects.
+version=0.3.0
+author=Local plugin development
+email=
+about=Digitize a line on the map canvas, preview a left, right or both-side buffer in meters, and save every result into the active polygon layer or a temporary buffer layer.
+category=Vector
+icon=icon.svg
+experimental=True
+deprecated=False
+repository=
+tracker=
+homepage=
+tags=buffer,line,digitizing,offset,directional
+
