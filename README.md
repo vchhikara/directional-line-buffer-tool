@@ -1,5 +1,8 @@
 # Directional Line Buffer
 
+Copyright (c) Vipul Chhikara. Licensed under the GNU General Public License,
+version 3 or (at your option) any later version; see `LICENSE`.
+
 QGIS plugin for drawing left, right or both-side line buffers in projected,
 meter-based projects.
 
