@@ -1,32 +1,49 @@
-from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QDoubleSpinBox, QComboBox, QDialogButtonBox, QLabel
+"""Small native Qt dialog for buffer parameters."""
+
+from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtWidgets import (
+    QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox, QFormLayout,
+    QLabel, QVBoxLayout,
+)
+
+
+def tr(message):
+    return QCoreApplication.translate('DirectionalLineBuffer', message)
 
 
 class BufferDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, destination_text=''):
         super().__init__(parent)
-        self.setWindowTitle('Directional Line Buffer')
-        self.setMinimumWidth(300)
+        self.setWindowTitle(tr('Directional Line Buffer'))
+        self.setMinimumWidth(340)
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel('Enter the buffer distance and choose the side relative to the digitizing direction.'))
+        hint = QLabel(tr('Enter a distance and choose the buffer side relative to digitizing direction.'))
+        hint.setWordWrap(True)
+        layout.addWidget(hint)
 
         form = QFormLayout()
-        self.distance = QDoubleSpinBox()
+        self.distance = QDoubleSpinBox(self)
         self.distance.setRange(0.01, 100000000.0)
         self.distance.setDecimals(3)
         self.distance.setValue(10.0)
-        self.distance.setSuffix(' m')
-        self.distance.setToolTip('Buffer distance in meters')
-        form.addRow('Distance:', self.distance)
+        self.distance.setSuffix(tr(' m'))
+        self.distance.setToolTip(tr('Buffer distance in meters, measured in the project CRS'))
+        form.addRow(tr('Distance:'), self.distance)
 
-        self.side_combo = QComboBox()
-        self.side_combo.addItem('Both sides', 'both')
-        self.side_combo.addItem('Left side', 'left')
-        self.side_combo.addItem('Right side', 'right')
-        form.addRow('Buffer side:', self.side_combo)
+        self.side_combo = QComboBox(self)
+        self.side_combo.addItem(tr('Both sides'), 'both')
+        self.side_combo.addItem(tr('Left side'), 'left')
+        self.side_combo.addItem(tr('Right side'), 'right')
+        form.addRow(tr('Buffer side:'), self.side_combo)
         layout.addLayout(form)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        if destination_text:
+            destination_label = QLabel(destination_text)
+            destination_label.setWordWrap(True)
+            layout.addWidget(destination_label)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -36,4 +53,3 @@ class BufferDialog(QDialog):
 
     def side(self):
         return self.side_combo.currentData()
-

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Directional Line Buffer help</title>
+<style>
+body { font-family: sans-serif; max-width: 50rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #252e33 }
+h1, h2 { line-height: 1.2 }
+code { background: #f3f5f6; padding: 0.1rem 0.2rem }
+</style>
+</head>
+<body>
+<h1>Directional Line Buffer</h1>
+<p>Draw a polyline directly on the QGIS map, preview a directional buffer and save the polygon. Requires a projected project CRS with <strong>meters</strong> as map units.</p>
+<h2>Quick start</h2>
+<ol>
+<li>Set the project CRS to a projected meter-based CRS appropriate for your area.</li>
+<li>Choose the active polygon layer that should receive the result, if desired. Otherwise the plugin creates its own temporary polygon memory layer.</li>
+<li>Open <strong>Plugins &gt; Directional Line Buffer &gt; Directional Line Buffer</strong>. Confirm the destination shown in the dialog.</li>
+<li>Set distance (meters) and side. Left and right follow the order in which points are digitized.</li>
+<li>Left-click to place vertices. Right-click, double-click or press Enter to finish. Repeat for another buffer.</li>
+<li>Press Escape to discard the current line. With no unfinished line, Escape exits digitizing.</li>
+</ol>
+<h2>Output</h2>
+<p>When a writable, compatible polygon layer is selected at start, the plugin attempts to save to that layer. Otherwise it uses a temporary <code>Directional buffer</code> layer. If a safe output write is rejected, it attempts a temporary fallback; uncertain transaction commits are <strong>not</strong> retried automatically to avoid duplicate output. An editable layer retains the result as an undoable edit; a non-editing layer is committed automatically.</p>
+<p>Attributes <code>distance_m</code> and <code>side</code> are populated if the destination has those fields. A new temporary layer contains both. Existing layer fields are never added by the plugin.</p>
+<h2>Restrictions and errors</h2>
+<p>The line needs two different points and a positive finite distance. The project and map canvas CRS must remain unchanged throughout digitizing. Sharp bends or crossing paths can produce invalid polygons and will be rejected without output. An incompatible destination layer will cause temporary output instead. Save temporary memory output to disk before closing the QGIS project.</p>
+<p>Check <strong>View &gt; Panels &gt; Log Messages</strong> and the <strong>Directional Line Buffer</strong> category if an output attempt fails. Review any uncertain commit before attempting the same buffer again.</p>
+</body>
+</html>
