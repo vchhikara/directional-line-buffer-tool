@@ -22,7 +22,7 @@ class PackageTests(unittest.TestCase):
         parser.read(PLUGIN / 'metadata.txt', encoding='utf-8')
         self.assertEqual(parser['general']['version'], '0.3.1')
         self.assertEqual(parser['general']['qgisMinimumVersion'], '3.30')
-        self.assertEqual(parser['general']['experimental'], 'True')
+        self.assertEqual(parser['general']['experimental'], 'False')
 
     def test_correct_class_factory(self):
         self.assertIn('classFactory', (PLUGIN / '__init__.py').read_text())

@@ -14,9 +14,9 @@
 </p>
 
 <p align="center">
-  <img alt="QGIS" src="https://img.shields.io/badge/QGIS-3.30%20to%203.99-589632?logo=qgis&logoColor=white">
+  <img alt="QGIS" src="https://img.shields.io/badge/QGIS-3.30%20to%204.99-589632?logo=qgis&logoColor=white">
   <img alt="Python" src="https://img.shields.io/badge/Python-PyQGIS-3776AB?logo=python&logoColor=white">
-  <img alt="Status" src="https://img.shields.io/badge/status-experimental-orange">
+  <img alt="Status" src="https://img.shields.io/badge/status-stable-2ea44f">
   <a href="Directional_line_buffer_Tool/LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
 </p>
 
@@ -56,7 +56,6 @@ What you can do:
 4. Optionally select a writable polygon layer in the Layers panel.
 5. Click the **Directional Line Buffer** toolbar icon, then choose the distance and the side.
 
-The plugin is marked experimental. Enable **Show also experimental plugins** in the Plugin Manager settings to see it.
 
 ---
 
@@ -105,8 +104,8 @@ Single-side buffers use mitered joins (12 segments, miter limit 5). Both-side bu
 - The tool draws new single-part lines. It does not buffer lines that already exist in a layer.
 - Buffers can be multipart when the geometry requires it.
 - The preview redraws on every mouse move and can lag on very long lines. No benchmark exists yet.
-- The plugin declares support for QGIS 3.30 through 3.99. QGIS 4 and Qt 6 are untested and excluded.
-- Testing so far used unit tests and mocked QGIS objects. Wider testing in QGIS desktop is planned, which is why the plugin stays experimental.
+- The plugin declares support for QGIS 3.30 through 4.99. The author tested it in QGIS 4. Releases in the QGIS 3 series have had less testing.
+- Unit tests run without QGIS. Please report problems from other QGIS versions and operating systems in the issue tracker.
 
 ---
 

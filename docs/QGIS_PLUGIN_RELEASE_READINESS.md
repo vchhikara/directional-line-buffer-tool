@@ -20,10 +20,10 @@
 | Reproducible packaging | **Passed** | Independently rebuilt ZIPs with the same SHA-256 |
 | ZIP size within repository limit | **Passed** | 420,745 bytes vs published 25 MB limit |
 | Automatic non-QGIS regressions | **Passed** | 37 passed, 0 failed, 3 native tests skipped |
-| Actual QGIS install and GUI/geometry behavior | **NOT RUN** | No QGIS/PyQt runtime present |
+| Actual QGIS install and GUI/geometry behavior | **Passed in QGIS 4** | Reported by the owner after a manual run on 2026-11-07. Exact version and OS not recorded here |
 | QGIS 3.30-3.x broad compatibility | **NOT ESTABLISHED** | Metadata scope only, not evidence of a tested range |
-| QGIS 4 and Qt 6 support | **Excluded intentionally** | `qgisMaximumVersion=3.99`; QGIS 4 requires migration testing |
-| Public GitHub source repository | **BLOCKED** | Connected GitHub identifies `vchhikara/directional-line-buffer-tool` as **private**; anonymous URL returned 404 |
+| QGIS 4 and Qt 6 support | **Declared** | `qgisMaximumVersion=4.99`; owner tested in QGIS 4. Review the Qt6 Check tab after upload |
+| Public GitHub source repository | **Passed** | Repository public on 2026-11-07. URLs returned HTTP 200 without login |
 | Public homepage and issue tracker | **BLOCKED** | Paths under the private repository are not anonymously usable |
 | Public source matches submitted ZIP | **NOT VERIFIED** | No publication or source sync performed |
 | Repository automated scanning, moderation, approval | **NOT RUN** | Requires explicit owner's publication actions |

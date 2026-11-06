@@ -8,7 +8,7 @@ The `mainPlugin.py` name in the QGIS cookbook is an example, not an enforced fil
 
 ## Environment
 
-This plugin declares `qgisMinimumVersion=3.30` as in the original metadata, and `qgisMaximumVersion=3.99` to restrict unverified QGIS 4/Qt 6 compatibility. All QGIS runtime APIs must be verified against the actual target version. Use QGIS's packaged Python and bundled PyQt rather than installing PyQt separately. No third-party Python runtime dependency is declared. For the optional native integration suite, install the QGIS Python bindings, QGIS GUI libraries and a working Qt graphical/offscreen environment (e.g. `xvfb-run`).
+This plugin declares `qgisMinimumVersion=3.30` as in the original metadata, and `qgisMaximumVersion=4.99`. The author tested the plugin in QGIS 4. The code still uses some Qt 5 style calls, so check the Qt 6 report on the plugin repository after each upload. All QGIS runtime APIs must be verified against the actual target version. Use QGIS's packaged Python and bundled PyQt rather than installing PyQt separately. No third-party Python runtime dependency is declared. For the optional native integration suite, install the QGIS Python bindings, QGIS GUI libraries and a working Qt graphical/offscreen environment (e.g. `xvfb-run`).
 
 ## Dependency-free checks and packaging
 

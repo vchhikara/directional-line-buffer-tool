@@ -9,6 +9,7 @@
 - Dispose Qt canvas rubber bands on plugin reload/replacement and remove duplicate action registration.
 - Use explicit QGIS meter unit enum, make memory CRS setup independent of EPSG authority strings.
 - Add parameter/destination descriptions, offline HTML help, regression tests and reproducible packaging.
+- Tested in QGIS 4 by the author. Set `qgisMaximumVersion=4.99` and `experimental=False`.
 - Keep existing core buffering algorithms, icon, plugin name, author, license and minimum declared QGIS version; explicitly cap compatibility metadata at QGIS 3.99 because QGIS 4/Qt 6 was not tested.
 
 ## 0.3.0 - Original archive
