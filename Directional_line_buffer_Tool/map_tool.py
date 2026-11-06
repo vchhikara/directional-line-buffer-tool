@@ -2,7 +2,6 @@
 
 from qgis.PyQt.QtCore import QVariant, Qt
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt import sip
 from qgis.core import (
     QgsCoordinateTransform, QgsFeature, QgsField, QgsGeometry, QgsMessageLog,
     QgsPointXY, QgsProject, QgsVectorDataProvider, QgsVectorLayer,
@@ -357,6 +356,6 @@ class DirectionalBufferMapTool(QgsMapTool):
             if band is not None:
                 band.hide()
                 self.canvas.scene().removeItem(band)
-                sip.delete(band)
+                band.deleteLater()
                 setattr(self, name, None)
         self.deleteLater()

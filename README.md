@@ -1,69 +1,131 @@
-# Directional Line Buffer
+<h1 align="center">Directional Line Buffer</h1>
 
-Draw a line on the QGIS map canvas and create a polygon buffer on its left, right, or both sides. The polygon appears as you draw and is saved when you finish the line.
+<p align="center">
+  <img src="docs/images/banner.png" alt="Directional Line Buffer, a QGIS plugin. Buffer one side of a line, or both." width="100%">
+</p>
 
-## Requirements
+<p align="center">
+  <img src="Directional_line_buffer_Tool/icon.png" alt="Directional Line Buffer icon" width="96">
+</p>
 
-- QGIS 3.30 to 3.99, as declared in the plugin metadata. Compatibility across every QGIS 3 release has not been established.
-- A valid projected project CRS with meter units. Choose a projection suited to your location and the accuracy you need.
-- The map canvas CRS must match the project CRS.
+<p align="center">
+  <strong>Draw a line on your map. Get a buffer on the left, the right, or both sides.</strong><br>
+  Set the distance in meters and see the result before you save it.
+</p>
 
-QGIS supplies the required Python and Qt libraries. No additional packages or network connection are needed at runtime.
+<p align="center">
+  <img alt="QGIS" src="https://img.shields.io/badge/QGIS-3.30%20to%203.99-589632?logo=qgis&logoColor=white">
+  <img alt="Python" src="https://img.shields.io/badge/Python-PyQGIS-3776AB?logo=python&logoColor=white">
+  <img alt="Status" src="https://img.shields.io/badge/status-experimental-orange">
+  <a href="Directional_line_buffer_Tool/LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
+</p>
 
-## Install
+A normal buffer grows on every side of a line. Many jobs need only one side: a setback from a road, a riparian strip along a river, a corridor next to a pipeline, a one-sided right-of-way. Directional Line Buffer draws that polygon for you, straight on the map canvas, with no need to build the line first.
+
+What you can do:
+
+- Click a line on the map and watch the buffer polygon follow your mouse.
+- Pick **Left**, **Right** or **Both** sides, and type the distance in meters.
+- Draw as many buffers as you like without reopening the dialog.
+- Save each polygon into your own polygon layer, or into a temporary layer the plugin creates.
+- Undo the last polygon when you write into a layer that is already in edit mode.
+
+**The result is a real polygon.** Every buffer is written as a feature, with its distance and side stored in the attribute table.
+
+---
+
+## Features
+
+| Feature | What it does |
+|---|---|
+| Directional buffers | Left, right or both sides of the line you digitize. For a line drawn east, left is north and right is south. |
+| Live preview | The polygon redraws as the mouse moves, so you see the shape before you finish the line. |
+| Your layer or ours | Select a writable polygon layer first and the plugin saves into it. Select nothing and it creates a temporary `Directional buffer` layer. |
+| CRS transformation | The polygon is transformed when your target layer uses a different CRS than the project. |
+| Safe saving | Invalid, empty or degenerate buffers are rejected with a warning and never written. |
+| Attributes | `distance_m` and `side` are filled in when those fields exist in the target layer. |
+| Offline help | Open the help page from **Plugins > Directional Line Buffer > Directional Line Buffer Help**. |
+
+---
+
+## Getting started
 
 1. Open **Plugins > Manage and Install Plugins** in QGIS.
-2. Select **Install from ZIP** and choose the plugin ZIP. The ZIP must contain one top-level `Directional_line_buffer_Tool/` folder.
-3. Enable **Directional Line Buffer** if necessary. Open it from the Plugins menu or the toolbar.
+2. Search for **Directional Line Buffer** and click **Install Plugin**. To use a downloaded file, choose **Install from ZIP** instead.
+3. Set your project CRS to a projected system that uses meters, for example a local UTM zone.
+4. Optionally select a writable polygon layer in the Layers panel.
+5. Click the **Directional Line Buffer** toolbar icon, then choose the distance and the side.
 
-The plugin is marked experimental in its metadata. If it does not appear, check whether experimental plugins are enabled in Plugin Manager.
+The plugin is marked experimental. Enable **Show also experimental plugins** in the Plugin Manager settings to see it.
 
-For development, copy or link the plugin folder into the active QGIS profile's Python `plugins` directory, then restart QGIS or reload the plugin.
+---
 
-## Draw a buffer
+## How to draw
 
-1. Set the project to a suitable projected CRS with meter units.
-2. To write into an existing polygon layer, select that layer before opening the tool. Otherwise, the plugin will use a temporary layer.
-3. Open **Directional Line Buffer**. Enter a distance and choose **Both sides**, **Left side**, or **Right side**. The default distance is 10.000 m; the minimum is 0.010 m.
-4. Left-click to place line vertices. Move the pointer to preview the buffer.
-5. Right-click, double-click, or press **Enter** to finish the line.
-6. Draw another line, or press **Escape** on a clear canvas to exit. Press **Escape** while drawing to discard the unfinished line.
+1. Left-click to add vertices. Move the mouse to preview the polygon.
+2. Finish the line with a **right-click**, a **double-click** or **Enter**.
+3. Keep drawing. The next line starts a new buffer.
+4. Press **Escape** once to drop an unfinished line. Press it again on a clean canvas to leave the tool.
 
-Left and right follow the direction in which you draw. For a line drawn east, left is north and right is south. Reversing the line reverses those sides.
+The default distance is 10 m and the minimum is 0.01 m.
 
-The destination is selected when you open the tool and stays fixed while you draw. If the project or canvas CRS changes during digitizing, the tool cancels the drawing.
+Single-side buffers use mitered joins (12 segments, miter limit 5). Both-side buffers use the standard QGIS round buffer (12 segments).
 
-## Output and saving
+---
 
-A selected polygon layer must be in the project, have a valid CRS, be writable, and support adding features. The plugin transforms the polygon to the layer CRS when needed. It fills `distance_m` and `side` if those fields already exist; it does not add fields to an existing destination layer.
+## Where your polygons go
 
-If the destination is already being edited, the new polygon is a separate undoable edit. Otherwise, the plugin starts an edit operation and commits it immediately.
+- **A writable polygon layer selected before you start** receives each polygon. The layer is locked in when digitizing begins, even if you select another layer later.
+- **No compatible layer selected** creates a temporary memory layer named `Directional buffer`, in the project CRS, with `distance_m` and `side` fields. The plugin reuses only layers it created itself.
+- **A layer already in edit mode** records each polygon as one undoable edit.
+- **A layer not in edit mode** is edited and committed right away.
+- **A write the layer rejects** triggers a warning, and the plugin saves into the temporary layer. If a commit may have partly succeeded, the plugin makes no fallback copy. Check the target layer and the QGIS Log Messages panel before you try again, to avoid duplicates.
 
-When no suitable layer is selected, the plugin creates a temporary memory layer named `Directional buffer`, with `distance_m` and `side` fields. It reuses only a matching plugin-owned memory layer. **Save temporary results to a permanent GIS format before closing the project**, or they will be lost.
+**Save temporary results to a file before you close the project.** Memory layers disappear when QGIS closes.
 
-If a write fails safely, the plugin warns you and tries the temporary layer. If a commit may have partially written data, it makes no fallback copy. Check the destination and the QGIS Log Messages panel before retrying to avoid duplicates.
+---
 
-## Troubleshooting
+## When something goes wrong
 
-| Message or symptom | What to check |
-| --- | --- |
-| Projected meter-based CRS required | Choose a projected project CRS with meter units. Geographic latitude/longitude coordinates are not accepted. |
-| Project or canvas CRS changed | Restart the tool after setting the project and canvas CRS. The unfinished drawing is discarded. |
-| Invalid or empty buffer | Draw at least two distinct points. For sharp bends, loops, or crossings, try a simpler line. |
-| Output goes to a temporary layer | Check that the selected polygon layer is writable, remains in the project, has a valid CRS, and accepts the feature and its attributes. |
-| Commit may be partial | Review the target layer and its commit errors before retrying. |
-| Output is missing after restart | Save temporary memory layers to a permanent format before closing QGIS. |
+| What you see | What to do |
+|---|---|
+| Meter CRS warning | Switch the project to a projected CRS in meters. Latitude and longitude are not accepted. |
+| CRS changed warning | Start the line again. Points from the previous CRS are discarded. |
+| Invalid or empty buffer | Place at least two distinct points. Simplify sharp bends, loops and crossings. |
+| Output went to the temporary layer | The selected layer was read-only, removed, incompatible or rejected the feature. Check its properties and constraints. |
+| Commit may be partial | Inspect the target layer and the log before you repeat the action. |
+| Output missing after restart | The result sat in an unsaved temporary layer. |
 
-Offline help is available under **Plugins > Directional Line Buffer > Directional Line Buffer Help**.
+---
 
-## Geometry and limitations
+## Limits
 
-Buffers use planar distances in the project CRS; they are not geodesic. Meter units alone do not guarantee ground-distance accuracy.
+- Distances are planar and use the units of the project CRS. They are not geodesic. Choose a projection that suits your region and accuracy needs.
+- Layers with mandatory fields, triggers, geometry constraints, Z/M requirements or a different geometry type can reject writes.
+- The tool draws new single-part lines. It does not buffer lines that already exist in a layer.
+- Buffers can be multipart when the geometry requires it.
+- The preview redraws on every mouse move and can lag on very long lines. No benchmark exists yet.
+- The plugin declares support for QGIS 3.30 through 3.99. QGIS 4 and Qt 6 are untested and excluded.
+- Testing so far used unit tests and mocked QGIS objects. Wider testing in QGIS desktop is planned, which is why the plugin stays experimental.
 
-Single-sided buffers use QGIS/GEOS miter joins with 12 segments and a miter limit of 5. Both-sided buffers use the standard round-buffer operation with 12 segments. Invalid or empty results are rejected.
+---
 
-The tool digitizes new single-part centerlines. It does not buffer existing multiline features. Output may be multipart. Layers with mandatory fields, triggers, geometry constraints, or Z/M requirements can reject a feature. Preview is recalculated as the pointer moves and may slow down for long lines.
+## For developers
 
-## License
+The installable plugin lives in [`Directional_line_buffer_Tool/`](Directional_line_buffer_Tool/). Do not install the whole repository as a plugin. Build the upload ZIP with the packaging script.
 
-Copyright (c) Vipul Chhikara. Licensed under GPL-3.0-or-later; see [LICENSE](LICENSE).
+```bash
+python3 scripts/package_plugin.py --source Directional_line_buffer_Tool --output dist/DirectionalLineBuffer.zip
+```
+
+- [Development, validation, tests and packaging](DEVELOPMENT.md)
+- [Release readiness](docs/QGIS_PLUGIN_RELEASE_READINESS.md)
+- [Audit report](docs/QGIS_PLUGIN_AUDIT_REPORT.md) and [test report](docs/QGIS_PLUGIN_TEST_REPORT.md)
+
+---
+
+## Contributing
+
+Report bugs and ideas in the [issue tracker](https://github.com/vchhikara/directional-line-buffer-tool/issues). Include your QGIS version, your operating system and the steps that led to the problem.
+
+Directional Line Buffer is free software under the GNU General Public License, version 3 or later. See [LICENSE](Directional_line_buffer_Tool/LICENSE). Copyright (c) Vipul Chhikara.
