@@ -49,18 +49,18 @@ class DirectionalBufferMapTool(QgsMapTool):
         self.cursor_point = None
         self._disposed = False
 
-        self.center_band = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
+        self.center_band = QgsRubberBand(self.canvas, QgsWkbTypes.GeometryType.LineGeometry)
         self.center_band.setColor(QColor(110, 110, 110, 190))
         self.center_band.setWidth(2)
-        self.center_band.setLineStyle(Qt.DotLine)
+        self.center_band.setLineStyle(Qt.PenStyle.DotLine)
 
-        self.buffer_band = QgsRubberBand(self.canvas, QgsWkbTypes.PolygonGeometry)
+        self.buffer_band = QgsRubberBand(self.canvas, QgsWkbTypes.GeometryType.PolygonGeometry)
         self.buffer_band.setColor(QColor(36, 130, 170, 220))
         self.buffer_band.setFillColor(QColor(100, 190, 220, 55))
         self.buffer_band.setWidth(2)
-        self.buffer_band.setLineStyle(Qt.DotLine)
+        self.buffer_band.setLineStyle(Qt.PenStyle.DotLine)
 
-        self.setCursor(Qt.CrossCursor)
+        self.setCursor(Qt.CursorShape.CrossCursor)
 
     def _crs_unchanged(self):
         if (QgsProject.instance().crs() == self.source_crs
@@ -76,12 +76,12 @@ class DirectionalBufferMapTool(QgsMapTool):
         if self._disposed or not self._crs_unchanged():
             return
         point = QgsPointXY(self.toMapCoordinates(event.pos()))
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             if not self.points or point != self.points[-1]:
                 self.points.append(point)
             self.cursor_point = point
             self.refresh_preview()
-        elif event.button() == Qt.RightButton:
+        elif event.button() == Qt.MouseButton.RightButton:
             self.finish()
 
     def canvasMoveEvent(self, event):
@@ -95,16 +95,16 @@ class DirectionalBufferMapTool(QgsMapTool):
             self.refresh_preview(include_cursor=True)
 
     def canvasDoubleClickEvent(self, event):
-        if event.button() == Qt.LeftButton and not self._disposed and self._crs_unchanged():
+        if event.button() == Qt.MouseButton.LeftButton and not self._disposed and self._crs_unchanged():
             point = QgsPointXY(self.toMapCoordinates(event.pos()))
             if not self.points or point != self.points[-1]:
                 self.points.append(point)
             self.finish()
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
+        if event.key() == Qt.Key.Key_Escape:
             self.cancel()
-        elif event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self.finish()
         else:
             super().keyPressEvent(event)
@@ -120,8 +120,8 @@ class DirectionalBufferMapTool(QgsMapTool):
         if self._disposed:
             return
         points = self._line_points(include_cursor)
-        self.center_band.reset(QgsWkbTypes.LineGeometry)
-        self.buffer_band.reset(QgsWkbTypes.PolygonGeometry)
+        self.center_band.reset(QgsWkbTypes.GeometryType.LineGeometry)
+        self.buffer_band.reset(QgsWkbTypes.GeometryType.PolygonGeometry)
         if len(points) < 2:
             if points:
                 self.center_band.addPoint(points[0], True)
@@ -208,11 +208,11 @@ class DirectionalBufferMapTool(QgsMapTool):
             if (isinstance(layer, QgsVectorLayer)
                     and QgsProject.instance().mapLayer(layer.id()) is not None
                     and layer.isValid()
-                    and layer.geometryType() == QgsWkbTypes.PolygonGeometry
+                    and layer.geometryType() == QgsWkbTypes.GeometryType.PolygonGeometry
                     and layer.crs().isValid()
                     and not layer.readOnly()
                     and layer.dataProvider() is not None
-                    and layer.dataProvider().capabilities() & QgsVectorDataProvider.AddFeatures):
+                    and layer.dataProvider().capabilities() & QgsVectorDataProvider.Capability.AddFeatures):
                 return layer
         except RuntimeError:
             # The original layer can be removed and destroyed while drawing.
@@ -287,7 +287,7 @@ class DirectionalBufferMapTool(QgsMapTool):
             if (isinstance(layer, QgsVectorLayer)
                     and layer.customProperty(self.TEMP_LAYER_MARKER, False)
                     and layer.isValid() and layer.providerType() == 'memory'
-                    and layer.geometryType() == QgsWkbTypes.PolygonGeometry
+                    and layer.geometryType() == QgsWkbTypes.GeometryType.PolygonGeometry
                     and layer.crs() == self.source_crs):
                 self.ensure_fields(layer)
                 return layer
@@ -318,7 +318,7 @@ class DirectionalBufferMapTool(QgsMapTool):
         return layer
 
     def _log(self, message):
-        QgsMessageLog.logMessage(message, 'Directional Line Buffer', Qgis.Warning)
+        QgsMessageLog.logMessage(message, 'Directional Line Buffer', Qgis.MessageLevel.Warning)
 
     def warn(self, message):
         self.iface.messageBar().pushWarning('Directional Line Buffer', message)
@@ -327,9 +327,9 @@ class DirectionalBufferMapTool(QgsMapTool):
         self.points.clear()
         self.cursor_point = None
         if self.center_band is not None:
-            self.center_band.reset(QgsWkbTypes.LineGeometry)
+            self.center_band.reset(QgsWkbTypes.GeometryType.LineGeometry)
         if self.buffer_band is not None:
-            self.buffer_band.reset(QgsWkbTypes.PolygonGeometry)
+            self.buffer_band.reset(QgsWkbTypes.GeometryType.PolygonGeometry)
 
     def cancel(self):
         had_points = bool(self.points)

@@ -71,16 +71,16 @@ class DirectionalLineBuffer:
     def _is_meter_project():
         crs = QgsProject.instance().crs()
         return (crs.isValid() and not crs.isGeographic()
-                and crs.mapUnits() == QgsUnitTypes.DistanceMeters)
+                and crs.mapUnits() == QgsUnitTypes.DistanceUnit.DistanceMeters)
 
     def _destination_description(self, layer):
         try:
             ready = (isinstance(layer, QgsVectorLayer) and layer.isValid()
                      and QgsProject.instance().mapLayer(layer.id()) is not None
-                     and layer.geometryType() == QgsWkbTypes.PolygonGeometry
+                     and layer.geometryType() == QgsWkbTypes.GeometryType.PolygonGeometry
                      and layer.crs().isValid() and not layer.readOnly()
                      and layer.dataProvider() is not None
-                     and bool(layer.dataProvider().capabilities() & QgsVectorDataProvider.AddFeatures))
+                     and bool(layer.dataProvider().capabilities() & QgsVectorDataProvider.Capability.AddFeatures))
         except RuntimeError:
             ready = False
         if ready:
@@ -110,7 +110,7 @@ class DirectionalLineBuffer:
         dialog = BufferDialog(
             self.iface.mainWindow(), self._destination_description(intended_layer),
         )
-        if dialog.exec_() != dialog.Accepted:
+        if dialog.exec() != dialog.DialogCode.Accepted:
             return
         # Recheck after a potentially long-lived modal dialog.
         if not self._is_meter_project() or self.iface.mapCanvas().mapSettings().destinationCrs() != project_crs:

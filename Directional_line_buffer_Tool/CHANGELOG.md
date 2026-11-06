@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2 - Qt 6 enum update (2026-11-07)
+
+- Use scoped enum names (for example `Qt.MouseButton.LeftButton`, `QgsWkbTypes.GeometryType.PolygonGeometry`) so the plugin passes the QGIS 4 / Qt 6 check.
+- Replace `exec_()` with `exec()`.
+- No change to buffering behavior.
+
 ## 0.3.1 - Patch release candidate (2026-11-04)
 
 - Fix accidental writes to unrelated `Directional buffer` layers: only reuse plugin-marked memory layers.

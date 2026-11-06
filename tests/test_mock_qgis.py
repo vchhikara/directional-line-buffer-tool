@@ -406,9 +406,11 @@ class MockQgisContracts(unittest.TestCase):
         )}
         core, qcore = modules['qgis.core'], modules['qgis.PyQt.QtCore']
         widgets = modules['qgis.PyQt.QtWidgets']
-        qcore.Qt = types.SimpleNamespace(
-            LeftButton=1, RightButton=2, Key_Escape=3, Key_Return=4,
-            Key_Enter=5, DotLine=6, CrossCursor=7,
+        NS = types.SimpleNamespace
+        qcore.Qt = NS(
+            MouseButton=NS(LeftButton=1, RightButton=2),
+            Key=NS(Key_Escape=3, Key_Return=4, Key_Enter=5),
+            PenStyle=NS(DotLine=6), CursorShape=NS(CrossCursor=7),
         )
         qcore.QVariant = types.SimpleNamespace(Double=float, String=str)
         qcore.QCoreApplication = types.SimpleNamespace(translate=lambda _key, text: text)
@@ -422,18 +424,19 @@ class MockQgisContracts(unittest.TestCase):
         core.Qgis = types.SimpleNamespace(
             JoinStyle=types.SimpleNamespace(Miter=7),
             BufferSide=types.SimpleNamespace(Left='LEFT', Right='RIGHT'),
-            Warning=2,
+            MessageLevel=types.SimpleNamespace(Warning=2),
         )
         for name, obj in (
             ('QgsProject', Project), ('QgsFeature', FakeFeature),
             ('QgsGeometry', FakeGeom), ('QgsPointXY', FakePoint),
             ('QgsField', FakeField), ('QgsVectorLayer', FakeLayer),
-            ('QgsVectorDataProvider', types.SimpleNamespace(AddFeatures=1)),
+            ('QgsVectorDataProvider', types.SimpleNamespace(Capability=types.SimpleNamespace(AddFeatures=1))),
             ('QgsCoordinateTransform', lambda *args: args),
             ('QgsMessageLog', types.SimpleNamespace(logMessage=lambda *args: None)),
-            ('QgsUnitTypes', types.SimpleNamespace(DistanceMeters=0)),
+            ('QgsUnitTypes', types.SimpleNamespace(DistanceUnit=types.SimpleNamespace(DistanceMeters=0))),
             ('QgsWkbTypes', types.SimpleNamespace(
-                LineGeometry=1, PolygonGeometry=2, isMultiType=lambda v: v == 6,
+                GeometryType=types.SimpleNamespace(LineGeometry=1, PolygonGeometry=2),
+                isMultiType=lambda v: v == 6,
             )), ('edit', fake_edit),
         ):
             setattr(core, name, obj)
