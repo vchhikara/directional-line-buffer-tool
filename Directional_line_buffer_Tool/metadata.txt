@@ -3,7 +3,7 @@ name=Directional Line Buffer
 qgisMinimumVersion=3.30
 qgisMaximumVersion=4.99
 description=Draw a line on the map and get a left, right or both-side buffer polygon in meters, with live preview.
-version=0.3.2
+version=0.3.3
 author=Vipul Chhikara
 email=vipul.chhikara@gmail.com
 about=Directional Line Buffer creates one-sided or two-sided buffer polygons from a line you digitize on the map canvas. Choose Left, Right or Both, type a distance in meters and watch the polygon update as you move the mouse. Finish the line and the polygon is saved into your own polygon layer or into a temporary layer, with the distance and side stored as attributes. Typical uses: road setbacks, riparian strips, pipeline corridors and one-sided rights-of-way. Requires a projected CRS in meters. Distances are planar. The plugin is experimental.
@@ -11,7 +11,8 @@ category=Vector
 icon=icon.png
 experimental=False
 deprecated=False
-changelog=0.3.2 - Use scoped Qt and QGIS enum names for QGIS 4 (Qt 6). No behavior change.
+changelog=0.3.3 - Fix an error when the tool is removed in QGIS 4. Tested in QGIS 4.2.
+    0.3.2 - Use scoped Qt and QGIS enum names for QGIS 4 (Qt 6). No behavior change.
     0.3.1 - CRS and output safety, undo, lifecycle cleanup, help and tests. Tested in QGIS 4. Marked stable.
     0.3.0 - Interactive directional buffers and polygon layer output.
 repository=https://github.com/vchhikara/directional-line-buffer-tool

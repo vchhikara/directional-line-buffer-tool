@@ -356,6 +356,9 @@ class DirectionalBufferMapTool(QgsMapTool):
             if band is not None:
                 band.hide()
                 self.canvas.scene().removeItem(band)
-                band.deleteLater()
+                # QgsRubberBand is not a QObject in QGIS 4, so call deleteLater only when it exists.
+                delete_later = getattr(band, 'deleteLater', None)
+                if delete_later is not None:
+                    delete_later()
                 setattr(self, name, None)
         self.deleteLater()

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3 - QGIS 4 cleanup fix (2026-11-07)
+
+- Fix `AttributeError` in `dispose()` in QGIS 4, where `QgsRubberBand` has no `deleteLater`. The tool now unloads cleanly.
+- Verified with the native test suite on QGIS 4.2.3 (35 passed, 5 skipped).
+
 ## 0.3.2 - Qt 6 enum update (2026-11-07)
 
 - Use scoped enum names (for example `Qt.MouseButton.LeftButton`, `QgsWkbTypes.GeometryType.PolygonGeometry`) so the plugin passes the QGIS 4 / Qt 6 check.

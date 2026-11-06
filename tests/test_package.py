@@ -20,7 +20,7 @@ class PackageTests(unittest.TestCase):
     def test_metadata_version(self):
         parser = configparser.ConfigParser()
         parser.read(PLUGIN / 'metadata.txt', encoding='utf-8')
-        self.assertEqual(parser['general']['version'], '0.3.2')
+        self.assertEqual(parser['general']['version'], '0.3.3')
         self.assertEqual(parser['general']['qgisMinimumVersion'], '3.30')
         self.assertEqual(parser['general']['experimental'], 'False')
 
