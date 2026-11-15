@@ -1,6 +1,6 @@
 """Small native Qt dialog for buffer parameters."""
 
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, Qt
 from qgis.PyQt.QtWidgets import (
     QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox, QFormLayout,
     QLabel, QVBoxLayout,
@@ -15,6 +15,7 @@ class BufferDialog(QDialog):
     def __init__(self, parent=None, destination_text=''):
         super().__init__(parent)
         self.setWindowTitle(tr('Directional Line Buffer'))
+        self.setWindowFlag(Qt.WindowType.WindowMinimizeButtonHint, True)
         self.setMinimumWidth(340)
 
         layout = QVBoxLayout(self)
@@ -36,6 +37,10 @@ class BufferDialog(QDialog):
         self.side_combo.addItem(tr('Left side'), 'left')
         self.side_combo.addItem(tr('Right side'), 'right')
         form.addRow(tr('Buffer side:'), self.side_combo)
+        self.end_combo = QComboBox(self)
+        self.end_combo.addItem(tr('Round'), 'round')
+        self.end_combo.addItem(tr('Flat'), 'flat')
+        form.addRow(tr('Road ends:'), self.end_combo)
         layout.addLayout(form)
 
         if destination_text:
@@ -44,6 +49,7 @@ class BufferDialog(QDialog):
             layout.addWidget(destination_label)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, self)
+        self.button_box = buttons
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -53,3 +59,6 @@ class BufferDialog(QDialog):
 
     def side(self):
         return self.side_combo.currentData()
+
+    def end_style(self):
+        return self.end_combo.currentData()

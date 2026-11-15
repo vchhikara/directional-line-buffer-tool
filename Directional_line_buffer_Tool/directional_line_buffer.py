@@ -2,9 +2,13 @@
 
 import os
 
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTimer
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QMessageBox
+try:
+    from qgis.PyQt.QtGui import QAction
+except ImportError:
+    from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QMessageBox, QCheckBox
 from qgis.core import (
     QgsProject, QgsUnitTypes, QgsVectorDataProvider, QgsVectorLayer, QgsWkbTypes,
 )
@@ -22,7 +26,10 @@ class DirectionalLineBuffer:
         self.iface = iface
         self.action = None
         self.help_action = None
+        self.news_action = None
         self.map_tool = None
+        self.dialog = None
+        self.version = '0.3.4'
         self.menu = self.tr('&Directional Line Buffer')
 
     def tr(self, message):
@@ -46,15 +53,42 @@ class DirectionalLineBuffer:
         self.help_action.setObjectName('directionalLineBufferHelpAction')
         self.help_action.triggered.connect(self.show_help)
         self.iface.addPluginToMenu(self.menu, self.help_action)
+        self.news_action = QAction(self.tr("What's New"), self.iface.mainWindow())
+        self.news_action.triggered.connect(self.show_news)
+        self.iface.addPluginToMenu(self.menu, self.news_action)
+        QTimer.singleShot(0, self.show_welcome)
+
+    def show_welcome(self):
+        settings = QSettings()
+        key = 'DirectionalLineBuffer/welcome/' + self.version
+        if settings.value(key, False, type=bool):
+            return
+        self.show_news()
+
+    def show_news(self):
+        box = QMessageBox(self.iface.mainWindow())
+        box.setWindowTitle(self.tr("What's New"))
+        box.setText(self.tr('Choose round or flat road ends. Right-click for finish or clear; Backspace removes the last point. The settings window can be minimized. See plugin help for instructions.'))
+        checkbox = QCheckBox(self.tr("Don't show automatically again for this version"))
+        checkbox.setChecked(True)
+        box.setCheckBox(checkbox)
+        box.exec()
+        QSettings().setValue('DirectionalLineBuffer/welcome/' + self.version, checkbox.isChecked())
 
     def show_help(self):
         from qgis.utils import showPluginHelp
         showPluginHelp(packageName=__package__)
 
     def unload(self):
+        if self.dialog is not None:
+            self.dialog.close()
         if self.map_tool is not None:
             self.map_tool.dispose()
             self.map_tool = None
+        if self.news_action is not None:
+            self.iface.removePluginMenu(self.menu, self.news_action)
+            self.news_action.deleteLater()
+            self.news_action = None
         if self.help_action is not None:
             self.iface.removePluginMenu(self.menu, self.help_action)
             self.help_action.triggered.disconnect(self.show_help)
@@ -90,6 +124,11 @@ class DirectionalLineBuffer:
         return self.tr('Output: a temporary memory polygon layer (save it before closing QGIS).')
 
     def start(self):
+        if self.dialog is not None:
+            self.dialog.showNormal()
+            self.dialog.raise_()
+            self.dialog.activateWindow()
+            return
         if not self._is_meter_project():
             QMessageBox.warning(
                 self.iface.mainWindow(),
@@ -107,20 +146,30 @@ class DirectionalLineBuffer:
             return
 
         intended_layer = self.iface.activeLayer()
-        dialog = BufferDialog(
+        self.dialog = BufferDialog(
             self.iface.mainWindow(), self._destination_description(intended_layer),
         )
-        if dialog.exec() != dialog.DialogCode.Accepted:
-            return
-        # Recheck after a potentially long-lived modal dialog.
+        self.dialog.button_box.accepted.disconnect(self.dialog.accept)
+        self.dialog.button_box.accepted.connect(lambda: self.activate_tool(intended_layer))
+        self.dialog.finished.connect(self.dialog_closed)
+        self.dialog.show()
+
+    def dialog_closed(self, result):
+        if self.map_tool is not None:
+            self.map_tool.dispose()
+            self.map_tool = None
+        self.dialog.deleteLater()
+        self.dialog = None
+
+    def activate_tool(self, intended_layer):
+        dialog = self.dialog
+        project_crs = QgsProject.instance().crs()
         if not self._is_meter_project() or self.iface.mapCanvas().mapSettings().destinationCrs() != project_crs:
-            QMessageBox.warning(
-                self.iface.mainWindow(), self.tr('CRS changed'),
-                self.tr('The CRS changed while the dialog was open. Restart the tool.'),
-            )
+            QMessageBox.warning(self.iface.mainWindow(), self.tr('CRS changed'), self.tr('Set a matching projected meter-based CRS.'))
             return
         new_tool = DirectionalBufferMapTool(
             self.iface, dialog.distance_meters(), dialog.side(), intended_layer,
+            dialog.end_style(),
         )
         self.iface.mapCanvas().setMapTool(new_tool)
         old_tool = self.map_tool
