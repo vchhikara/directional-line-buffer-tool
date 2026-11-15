@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.5
+
+- Package the 0.3.4 features for QGIS 4. Runtime verification is pending.
+
+## 0.3.4
+
+- Add round and flat road ends, a right-click digitizing menu, and Backspace vertex undo.
+- Add a minimizable settings window, What's New and updated help.
+
 ## 0.3.3 - QGIS 4 cleanup fix (2026-11-07)
 
 - Fix `AttributeError` in `dispose()` in QGIS 4, where `QgsRubberBand` has no `deleteLater`. The tool now unloads cleanly.

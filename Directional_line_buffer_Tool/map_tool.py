@@ -2,6 +2,8 @@
 
 from qgis.PyQt.QtCore import QVariant, Qt
 from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtWidgets import QMenu
+import math
 from qgis.core import (
     QgsCoordinateTransform, QgsFeature, QgsField, QgsGeometry, QgsMessageLog,
     QgsPointXY, QgsProject, QgsVectorDataProvider, QgsVectorLayer,
@@ -36,13 +38,14 @@ class DirectionalBufferMapTool(QgsMapTool):
         ('side', QVariant.String, 'string', 16, 0),
     )
 
-    def __init__(self, iface, distance, side, preferred_layer=None):
+    def __init__(self, iface, distance, side, preferred_layer=None, end_style='round'):
         validate_parameters(distance, side)
         super().__init__(iface.mapCanvas())
         self.iface = iface
         self.canvas = iface.mapCanvas()
         self.distance = distance
         self.side = side
+        self.end_style = end_style
         self.preferred_layer = preferred_layer
         self.source_crs = QgsProject.instance().crs()
         self.points = []
@@ -82,7 +85,15 @@ class DirectionalBufferMapTool(QgsMapTool):
             self.cursor_point = point
             self.refresh_preview()
         elif event.button() == Qt.MouseButton.RightButton:
-            self.finish()
+            menu = QMenu(self.canvas)
+            finish_action = menu.addAction('Finish digitizing')
+            clear_action = menu.addAction('Clear digitizing')
+            selected = menu.exec(self.canvas.mapToGlobal(event.pos()))
+            if selected == finish_action:
+                self.finish()
+            elif selected == clear_action:
+                self.reset_drawing()
+                self.canvas.refresh()
 
     def canvasMoveEvent(self, event):
         if self._disposed or not self._crs_unchanged():
@@ -104,6 +115,11 @@ class DirectionalBufferMapTool(QgsMapTool):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
             self.cancel()
+        elif event.key() == Qt.Key.Key_Backspace:
+            if self.points:
+                self.points.pop()
+                self.cursor_point = None
+                self.refresh_preview()
         elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self.finish()
         else:
@@ -139,9 +155,33 @@ class DirectionalBufferMapTool(QgsMapTool):
 
     def make_buffer(self, line):
         if self.side == 'both':
-            return line.buffer(self.distance, 12)
+            cap = Qgis.EndCapStyle.Round if self.end_style == 'round' else Qgis.EndCapStyle.Flat
+            return line.buffer(self.distance, 12, cap, Qgis.JoinStyle.Round, 5.0)
         side = LEFT_SIDE if self.side == 'left' else RIGHT_SIDE
-        return line.singleSidedBuffer(self.distance, 12, side, MITER_JOIN, 5.0)
+        result = line.singleSidedBuffer(self.distance, 12, side, MITER_JOIN, 5.0)
+        if self.end_style == 'round':
+            points = line.asPolyline()
+            # Add the outer quarter-circle at each end on the chosen side.
+            for point, neighbor, forward in ((points[0], points[1], 1), (points[-1], points[-2], -1)):
+                dx, dy = neighbor.x() - point.x(), neighbor.y() - point.y()
+                length = math.hypot(dx, dy)
+                if not length:
+                    continue
+                dx, dy = dx / length, dy / length
+                # At the first endpoint the forward direction is toward neighbor;
+                # at the last it is away from neighbor.
+                nx, ny = -dy * forward, dx * forward
+                if self.side == 'right':
+                    nx, ny = -nx, -ny
+                outer_x, outer_y = -dx, -dy
+                radius = self.distance * 2
+                corners = [point, QgsPointXY(point.x()+outer_x*radius, point.y()+outer_y*radius),
+                           QgsPointXY(point.x()+(outer_x+nx)*radius, point.y()+(outer_y+ny)*radius),
+                           QgsPointXY(point.x()+nx*radius, point.y()+ny*radius), point]
+                clip = QgsGeometry.fromPolygonXY([corners])
+                circle = QgsGeometry.fromPointXY(point).buffer(self.distance, 12)
+                result = result.combine(circle.intersection(clip))
+        return result
 
     def finish(self):
         if self._disposed or not self._crs_unchanged():
